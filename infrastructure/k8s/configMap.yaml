@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: petclinic
+data:
+  application.properties: |
+    server.port=8081
+    database=h2
+    spring.datasource.schema=classpath*:db/${database}/schema.sql
+    spring.datasource.data=classpath*:db/${database}/data.sql
+
+    spring.thymeleaf.mode=HTML
+
+    spring.jpa.hibernate.ddl-auto=none
+    spring.jpa.open-in-view=false
+    spring.messages.basename=messages/messages
+

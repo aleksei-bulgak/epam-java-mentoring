@@ -1,0 +1,19 @@
+# Default values for spring-petclinic.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: petclinic:latest
+  pullPolicy: Never
+
+deployment:
+  port: 8080
+
+service:
+  type: ClusterIP
+  port: 80
+
+configMap:
+  
