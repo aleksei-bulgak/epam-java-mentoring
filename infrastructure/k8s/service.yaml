@@ -3,6 +3,7 @@ kind: Service
 metadata:
   name: petclinic
 spec:
+  type: NodePort
   selector:
     app: spring-petclinic
   ports:

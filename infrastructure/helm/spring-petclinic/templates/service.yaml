@@ -3,9 +3,10 @@ kind: Service
 metadata:
   name: petclinic
 spec:
-  selector:
+  type: {{ .Values.service.type }}
+  selector: 
     app: spring-petclinic
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 8081
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.deployment.port }}
