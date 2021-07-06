@@ -45,3 +45,5 @@ after that you can apply chart with
 ```
 helm install petclinic ./infrastructure/helm/spring-petclinic
 ```
+
+![helm output](./docs/helmoutput.png)
