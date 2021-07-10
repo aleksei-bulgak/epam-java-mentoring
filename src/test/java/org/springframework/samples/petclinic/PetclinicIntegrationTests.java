@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.samples.petclinic.vet.VetRepository;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
 @SpringBootTest
 class PetclinicIntegrationTests {
 
@@ -30,7 +32,8 @@ class PetclinicIntegrationTests {
 	@Test
 	void testFindAll() throws Exception {
 		vets.findAll();
-		vets.findAll(); // served from cache
+
+		assertNotEquals(0, vets.findAll().size()); // served from cache
 	}
 
 }

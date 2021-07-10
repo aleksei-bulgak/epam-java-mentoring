@@ -112,7 +112,7 @@ class ClinicServiceTests {
 		owner.setCity("Wollongong");
 		owner.setTelephone("4444444444");
 		this.owners.save(owner);
-		assertThat(owner.getId().longValue()).isNotEqualTo(0);
+		assertThat(owner.getId().longValue()).isNotZero();
 
 		owners = this.owners.findByLastName("Schultz");
 		assertThat(owners.size()).isEqualTo(found + 1);
