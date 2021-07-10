@@ -108,6 +108,11 @@ class OwnerController {
 
 	@GetMapping("/owners/{ownerId}/edit")
 	public String initUpdateOwnerForm(@PathVariable("ownerId") int ownerId, Model model) {
+		switch (ownerId) {
+		default -> System.out.println("default");
+		case 1 -> System.out.println('1');
+		case 2 -> System.out.println('2');
+		}
 		Owner owner = this.owners.findById(ownerId);
 		model.addAttribute(owner);
 		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
