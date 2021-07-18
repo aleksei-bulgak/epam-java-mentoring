@@ -19,11 +19,18 @@ pipeline{
         stage("Push") {
             steps {
                 script {
-                    env.PATH = "${env.PATH}:/usr/local/bin:/usr/bin:/usr/sbin:/sbin"
-                    withDockerRegistry(credentialsId: 'dockerhub_id') {
-                        image.push()
-                        image.push('latest')
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub_id', passwordVariable: 'password', usernameVariable: 'username')]) {
+                        sh"""
+                            docker login -u ${username} -p ${password} https://index.docker.io/v1/
+                            docker push alekseibulgak/petclinic:${env.BUILD_ID}
+                            docker push alekseibulgak/petclinic:latest
+                        """
                     }
+                    //Caused: java.io.IOException: Cannot run program "docker": error=2, No such file or directory
+                    // withDockerRegistry(credentialsId: 'dockerhub_id') {
+                    //     image.push()
+                    //     image.push('latest')
+                    // }
                 }
             }
         }
