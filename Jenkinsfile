@@ -23,6 +23,7 @@ pipeline{
                         sh"""
                             docker login -u ${username} -p ${password} https://index.docker.io/v1/
                             docker push alekseibulgak/petclinic:${env.BUILD_ID}
+                            docker tag alekseibulgak/petclinic:${env.BUILD_ID} alekseibulgak/petclinic:latest
                             docker push alekseibulgak/petclinic:latest
                         """
                     }
