@@ -1,49 +1,149 @@
-### Docker
+### Jenkins task
 
-To build application you have two ways
+#### Intro
+For current task was used local jenkins installation because jenkins in docker does not fully support docker.
+#### Task 1
 
-1. Build application locally `./mvnw clean build`
-2. Build application as part of Docker build process `docker build -t petclinic:latest --build-arg Xms=1024m --build-arg Xmx=2048m -f  Dockerfile.withBuild .`
+1. After jenkins was installed you need to configure credentials for github
 
-To pass `Xms` and `Xmx` properties as `ARGs` you need to add addtional params on build stage `--build-arg Xms=1024m --build-arg Xmx=2048m`
+![github credentials sample](./docs/jenkins/10.png)
 
-To attach properties file please use such command:
-`docker run -it -v ${PWD}/src/main/resources/application.properties:/app/application.properties  petclinic:latest`
+2. After credentials were configured then you will be able to create sample job(in my case I used Pipeline)
 
+![](./docs/jenkins/3.png)
 
-### K8S
-
-To apply all resources you need to have image in your local docker registry(check previous steps how to build image)
-
-All k8s resources are stored under `./infrastructure/k8s`
-
-To apply specific manifest you need to run such command:
-```
-kubectl create -f ./infrastructure/k8s/configMap.yaml
-
-kubectl create -f ./infrastructure/k8s/deployment.yaml
-
-kubectl create -f ./infrastructure/k8s/service.yaml
-```
-
-If you want to change port or update config you can run
-```
-kubectl update -f k8s/service.yaml
-```
-
-### Helm
-
-Helm chart stored under `./infrastructure/helm/spring-petclinic`
-
-To apply helm chart you need to make sure that previous resources were removed
+Contents of Jenkinsfile should be smth like this:
 
 ```
-kubectl delete <resource to remove>
+pipeline{
+    agent any
+
+    stages{
+        stage("Build"){
+            steps{
+                git branch: 'jenkins', credentialsId: 'github', url: 'git@github.com:aleksei-bulgak/epam-java-mentoring.git'
+                echo "Hello, World"
+            }
+        }
+    }
+}
+```
+1. Then you can trigger 
+
+![](./docs/jenkins/1.png)
+![](./docs/jenkins/2.png)
+
+
+#### Task 2
+
+Configure docker credentials in jenkins:
+1. Go to docker hub `https://hub.docker.com/settings/security` and create new `Access Token`.
+2. Create new credentials with your dockerHub username and token from previous step as password
+
+![](./docs/jenkins/11.png)
+
+Create Jenkins pipleine job(It would be better to move all account/dockerhub specific variables to the separate variables or jenkins job parameters):
+```
+def image = null;
+
+pipeline{
+    agent any
+
+    stages{
+        stage("Build"){
+            steps{
+                git branch: 'jenkins-2', credentialsId: 'github', url: 'git@github.com:aleksei-bulgak/epam-java-mentoring.git'
+                
+                script {
+                    env.PATH = "${env.PATH}:/usr/local/bin:/usr/bin:/usr/sbin:/sbin"
+                    def dockerfile = 'Dockerfile.withBuild'
+                    image = docker.build("alekseibulgak/petclinic:${env.BUILD_ID}")
+                }
+            }
+        }
+
+        stage("Push") {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub_id', passwordVariable: 'password', usernameVariable: 'username')]) {
+                        sh"""
+                            docker login -u ${username} -p ${password} https://index.docker.io/v1/
+                            docker push alekseibulgak/petclinic:${env.BUILD_ID}
+                            docker tag alekseibulgak/petclinic:${env.BUILD_ID} alekseibulgak/petclinic:latest
+                            docker push alekseibulgak/petclinic:latest
+                        """
+                    }
+                }
+            }
+        }
+    }
+}
 ```
 
-after that you can apply chart with 
+![](./docs/jenkins/4.png)
+
+as a result new image was published in docker hub
+![](./docs/jenkins/5.png)
+
+[to check image please click this link](https://hub.docker.com/r/alekseibulgak/petclinic/tags?page=1&ordering=last_updated)
+
+#### Task 3
+
+After you install plugins descibed in task you also need to add credentials with your kube config(in my case I used docker-desktop/kubernetes available as part of docker for mac instead of minikube)
+
+![](./docs/jenkins/9.png)
+
+Jenkisfile configuration:
 ```
-helm install petclinic ./infrastructure/helm/spring-petclinic
+def image = null;
+
+pipeline{
+    agent any
+
+    stages{
+        stage("Build"){
+            steps{
+                git branch: 'jenkins-3', credentialsId: 'github', url: 'git@github.com:aleksei-bulgak/epam-java-mentoring.git'
+                
+                script {
+                    env.PATH = "${env.PATH}:/usr/local/bin:/usr/bin:/usr/sbin:/sbin"
+                    def dockerfile = 'Dockerfile.withBuild'
+                    image = docker.build("alekseibulgak/petclinic:${env.BUILD_ID}")
+                }
+            }
+        }
+
+        stage("Push") {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub_id', passwordVariable: 'password', usernameVariable: 'username')]) {
+                        sh"""
+                            docker login -u ${username} -p ${password} https://index.docker.io/v1/
+                            docker push alekseibulgak/petclinic:${env.BUILD_ID}
+                            docker tag alekseibulgak/petclinic:${env.BUILD_ID} alekseibulgak/petclinic:latest
+                            docker push alekseibulgak/petclinic:latest
+                        """
+                    }
+                }
+            }
+        }
+
+        stage("Deploy") {
+            steps {
+                script {
+                    kubernetesDeploy configs: 'infrastructure/k8s/*', deleteResource: true, kubeconfigId: 'docker-desktop'
+                }
+            }
+        }
+    }
+}
 ```
 
-![helm output](./docs/helmoutput.png)
+If you use k8s resources from task1 then you need to specify docker image in docker hub format in my case:
+```
+    image: alekseibulgak/petclinic:latest
+    imagePullPolicy: Always
+```
+
+![](./docs/jenkins/6.png)
+![](./docs/jenkins/7.png)
