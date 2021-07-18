@@ -20,7 +20,7 @@ pipeline{
             steps {
                 script {
                     env.PATH = "${env.PATH}:/usr/local/bin:/usr/bin:/usr/sbin:/sbin"
-                    docker.withRegistry( '', 'dockerhub_id' ) {
+                    withDockerRegistry(credentialsId: 'dockerhub_id') {
                         image.push()
                         image.push('latest')
                     }
