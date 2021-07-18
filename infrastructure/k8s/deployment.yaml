@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
         - name: petclinic
-          image: petclinic:latest
-          imagePullPolicy: Never
+          image: alekseibulgak/petclinic:latest
+          imagePullPolicy: Always
           ports:
           - containerPort: 8081
           volumeMounts:
