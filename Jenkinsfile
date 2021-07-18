@@ -6,7 +6,7 @@ pipeline{
     stages{
         stage("Build"){
             steps{
-                git branch: 'jenkins', credentialsId: 'github', url: 'git@github.com:aleksei-bulgak/epam-java-mentoring.git'
+                git branch: 'jenkins-2', credentialsId: 'github', url: 'git@github.com:aleksei-bulgak/epam-java-mentoring.git'
                 
                 script {
                     env.PATH = "${env.PATH}:/usr/local/bin:/usr/bin:/usr/sbin:/sbin"
