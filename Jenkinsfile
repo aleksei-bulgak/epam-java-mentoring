@@ -35,5 +35,16 @@ pipeline{
                 }
             }
         }
+
+        stage("Deploy") {
+            steps {
+                script {
+                    kubernetesDeploy 
+                        configs: './ingrastructure/k8s',
+                        deleteResource: true,
+                        kubeconfigId: 'docker-desktop'
+                }
+            }
+        }
     }
 }
