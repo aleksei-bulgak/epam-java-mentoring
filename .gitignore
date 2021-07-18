@@ -1,4 +1,14 @@
-target/*
+target/.wro4j
+target/classes
+target/generated-sources
+target/generated-test-sources
+target/maven-archiver
+target/maven-status
+target/checkstyle*
+target/jacoco*
+target/site
+target/surefire-reports
+target/test-classes
 .settings/*
 .classpath
 .project
@@ -6,7 +16,6 @@ target/*
 .attach_pid*
 .idea
 *.iml
-/target
 .sts4-cache/
 .vscode
 _site/

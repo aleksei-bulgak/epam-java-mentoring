@@ -11,7 +11,7 @@ pipeline{
                 script {
                     env.PATH = "${env.PATH}:/usr/local/bin:/usr/bin:/usr/sbin:/sbin"
                     def dockerfile = 'Dockerfile.withBuild'
-                    image = docker.build("alekseibulgak/petclinic:${env.BUILD_ID}", "-f ${dockerfile} .")
+                    image = docker.build("alekseibulgak/petclinic:${env.BUILD_ID}")
                 }
             }
         }
