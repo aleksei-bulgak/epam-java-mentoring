@@ -1,0 +1,61 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath "com.avast.gradle:gradle-docker-compose-plugin:0.9.4"
+	}
+}
+
+plugins {
+	id 'org.springframework.boot' version '2.2.3.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+	id 'java'
+    id "org.flywaydb.flyway" version "6.2.3"
+}
+apply plugin: "docker-compose"
+
+group = 'io.reflectoring'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+
+	compileOnly 'org.projectlombok:lombok'
+
+    // Spring
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
+    // Database
+    implementation 'org.flywaydb:flyway-core'
+	implementation 'org.postgresql:postgresql:42.2.6'
+
+	// Add jaxb since it's no longer available in Java 11
+	runtime 'javax.xml.bind:jaxb-api:2.3.1'
+
+    // Test
+    testCompile 'org.assertj:assertj-core'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+	testImplementation('org.junit.jupiter:junit-jupiter:5.5.1')
+}
+
+test {
+	useJUnitPlatform()
+}
+
+flyway {
+	url = 'jdbc:postgresql://localhost:5432/database'
+	locations = [
+		// Add this if you have Java-based migrations
+		'classpath:db/migration'
+	]
+}
+
+dockerCompose.isRequiredBy(test)
